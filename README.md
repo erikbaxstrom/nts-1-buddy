@@ -79,15 +79,15 @@ Modulation of time parameter should be relative to current position of the contr
   - Copy uf2 file onto drive. Confirm drive remounts as “circuitpy”.
 - Run a blink LED script.
 
+## Hardware
+
+- Confirm that I can drill or dremel the perfboard to fit the potentiometer support legs.
+
 ## Test MIDI
 
 - Use MIDI over UART to “blink” a note on and off.
 - Use MIDI to "blink" a CC over UART
 - Maybe, if I'm feeling like it: Breadboard a pot, read value and map to midi cc
-
-## Hardware
-
-- Confirm that I can drill or dremel the perfboard to fit the potentiometer support legs.
 
 # Minimum Viable Product Phase
 
