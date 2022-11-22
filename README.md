@@ -29,7 +29,17 @@ Synth
 - Hammondeggs reverbs use HP or LP filters. Modulate that w/ an LFO could be cool.
 - Delay time. Changing the delay time while the delay is playing can make interesting sounds.
 
-# Proof of Concept Phase
+# Proof of Concept Phase -- Complete
+
+## Helpful Resources
+
+[Simple DIY Electronic Music Projects](https://diyelectromusic.wordpress.com/2021/06/28/toy-keyboard-usb-matrix-decode-with-the-pi-pico-part-2/)
+
+[Adafruit Pi Pico Getting Started](https://learn.adafruit.com/getting-started-with-raspberry-pi-pico-circuitpython/blinky-and-a-button)
+
+[Adafruit Grand Central USB MIDI Controller](https://learn.adafruit.com/grand-central-usb-midi-controller-in-circuitpython/code-usb-midi-in-circuitpython)
+
+[Adafruit MIDI Module Docs](https://docs.circuitpython.org/projects/midi/en/latest/)
 
 ## Select Hardware -- Complete
 
