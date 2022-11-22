@@ -70,7 +70,7 @@ Modulation of time parameter should be relative to current position of the contr
 
 - I really like the Smoke delay from Roll-log, but the NTS-1 can't do user delay at the same time as user reverb, so I'm still hoping to get some more interesting textures out of the built-in delay types.
 
-## Install Firmware and IDE -- complete
+## Install Firmware and IDE -- Complete
 
 - Install Mu
 - Download and Install circuitpytjon (circuitpython.org) on Pi Pico:
@@ -79,11 +79,11 @@ Modulation of time parameter should be relative to current position of the contr
   - Copy uf2 file onto drive. Confirm drive remounts as “circuitpy”.
 - Run a blink LED script.
 
-## Hardware -- complete
+## Hardware -- Complete
 
 - Confirm that I can drill or dremel the perfboard to fit the potentiometer support legs.
 
-## Test MIDI
+## Test MIDI -- Complete
 
 - Use MIDI over UART to “blink” a note on and off.
 - Use MIDI to "blink" a CC over UART
