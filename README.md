@@ -10,26 +10,34 @@ Aim to use inexpensive, widely available components.
 
 ### NTS-1 MID Parameters
 
-Effects
+| Effect Parameter | CC  |
+| ---------------- | --- |
+| Mod Time         | 28  |
+| Mod Depth        | 29  |
+| Delay Time       | 30  |
+| Delay Depth      | 31  |
+| Reverb Time      | 34  |
+| Reverb Depth     | 35  |
+| Reverb Mix\*     | 36  |
+| Delay Mix\*      | 32  |
 
-| Parameter    | CC  |
-| ------------ | --- |
-| Mod Time     | 28  |
-| Mod Depth    | 29  |
-| Delay Time   | 30  |
-| Delay Depth  | 31  |
-| Reverb Time  | 34  |
-| Reverb Depth | 35  |
-| Reverb Mix\* | 36  |
-| Delay Mix\*  | 32  |
+| Synth Parameter    | CC  |
+| ------------------ | --- |
+| Oscillator Shape   | 54  |
+| Oscillator Alt     | 55  |
+| Envelope Attack    | 16  |
+| Envelope Release   | 19  |
+| Filter Cutoff      | 43  |
+| Filter Resonance   | 44  |
+| Filter Sweep Rate  | 46  |
+| Filter Sweep Depth | 45  |
+| Arp Pattern        | 117 |
+| Arp Interval       | 118 |
+| Arp Length         | 119 |
+| Tremollo Rate      | 20  |
+| Tremollo Depth     | 21  |
 
-Synth Parameters
-
-- Oscillator: shape, alt
-- Envelope: AR
-- Filter Sweep: rate, depth\*
-- Arp: pattern, interval, length
-- Tremollo
+Note on filter sweep depth: >63: sweep up depth. <63: sweep down depth
 
 ### Ideas For Effects Modulation
 
