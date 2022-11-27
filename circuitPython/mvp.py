@@ -12,6 +12,7 @@ led = digitalio.DigitalInOut(board.LED)
 led.direction = digitalio.Direction.OUTPUT
 
 CHANNEL = 1
+SLEEP_TIME = 0.00
 
 uart = busio.UART(board.GP0, board.GP1, baudrate=31250, timeout=0.001)
 midi = adafruit_midi.MIDI(midi_out=uart, midi_in=uart, out_channel=CHANNEL - 1, debug=False)
@@ -23,10 +24,6 @@ mux_2 = digitalio.DigitalInOut(board.GP20)
 mux_0.direction = digitalio.Direction.OUTPUT
 mux_1.direction = digitalio.Direction.OUTPUT
 mux_2.direction = digitalio.Direction.OUTPUT
-
-mux_0.value = True
-mux_1.value = True
-mux_2.value = True
 
 mux_reading = AnalogIn(board.GP28)
 
@@ -45,19 +42,66 @@ button_1.pull = digitalio.Pull.DOWN
 button_2.pull = digitalio.Pull.DOWN
 button_3.pull = digitalio.Pull.DOWN
 
+# mapping
+midi_cc = [28, 29, 30, 31, 34, 35, 36, 32]
+midi_values = [0,0,0,0,0,0,0,0]
+
+
+
+# set up
+mux_0.value = False
+mux_1.value = False
+mux_2.value = False
+
 while True:
-    # read potentiometer
-    # set digital pins
-    mux_0.value = False
-    mux_1.value = False
+    # pot 3: 000
     mux_2.value = False
-    pot_value = mux_reading.value
-    midi_value = int(pot_value/512)
-    print('midi_value: ', midi_value, 'button:', button_0.value, button_1.value, button_2.value, button_3.value)
-    # read/store mux_reading
-    # wait?
-    # repeat
-    # output midi
-    midi.send(ControlChange(31, midi_value))
-    #led.value = not led.value
-    time.sleep(0.1)
+    midi_values[3] = int(mux_reading.value/512) #simpler/faster to bit shift. will try if this is too slow. May be limited by mux chip though.
+    time.sleep(SLEEP_TIME)
+    # pot 7: 001
+    mux_0.value = True
+    midi_values[7] = int(mux_reading.value/512)
+    time.sleep(SLEEP_TIME)
+    # pot 6: 011
+    mux_1.value = True
+    midi_values[6] = int(mux_reading.value/512)
+    time.sleep(SLEEP_TIME)
+    # pot 2: 010
+    mux_0.value = False
+    midi_values[2] = int(mux_reading.value/512)
+    time.sleep(SLEEP_TIME)
+    # pot 0: 110
+    mux_2.value = True
+    midi_values[0] = int(mux_reading.value/512)
+    time.sleep(SLEEP_TIME)
+    # pot 4: 111
+    mux_0.value = True
+    midi_values[4] = int(mux_reading.value/512)
+    time.sleep(SLEEP_TIME)
+    # pot 5: 101
+    mux_1.value = False
+    midi_values[5] = int(mux_reading.value/512)
+    time.sleep(SLEEP_TIME)
+    # pot 1: 100
+    mux_0.value = False
+    midi_values[1] = int(mux_reading.value/512)
+    time.sleep(SLEEP_TIME)
+    #print('midi_values: ', midi_values)
+    for i in range(0,8):
+        midi.send(ControlChange(midi_cc[i], midi_values[i]))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

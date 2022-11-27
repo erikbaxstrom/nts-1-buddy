@@ -12,11 +12,18 @@ Aim to use inexpensive, widely available components.
 
 Effects
 
-- Mod: time, depth
-- Delay: time, depth, mix\*
-- Reverb: time, depth, mix\*
+| Parameter    | CC  |
+| ------------ | --- |
+| Mod Time     | 28  |
+| Mod Depth    | 29  |
+| Delay Time   | 30  |
+| Delay Depth  | 31  |
+| Reverb Time  | 34  |
+| Reverb Depth | 35  |
+| Reverb Mix\* | 36  |
+| Delay Mix\*  | 32  |
 
-Synth
+Synth Parameters
 
 - Oscillator: shape, alt
 - Envelope: AR
@@ -99,7 +106,7 @@ Modulation of time parameter should be relative to current position of the contr
 - Use MIDI to "blink" a CC over UART
 - Maybe, if I'm feeling like it: Breadboard a pot, read value and map to midi cc
 
-# Minimum Viable Product Phase
+# Minimum Viable Product Phase -- Complete
 
 ## Hardware
 
