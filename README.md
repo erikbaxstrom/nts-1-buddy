@@ -128,7 +128,13 @@ Modulation of time parameter should be relative to current position of the contr
 - Connect pots to mux
 - Connect MUX to RasPi
 
+![](./button_layout.jpg)
+![](./wiring1.JPG)
+![](./wiring2.JPG)
+
 ## Firmware
 
 - Read MUX (using Gray Codes if I'm feeling fancy), convert readings to 8bit, and store in an array
 - Send the values in the array as MIDI CC out through UART.
+
+![](./hardware_prototype.jpg)
