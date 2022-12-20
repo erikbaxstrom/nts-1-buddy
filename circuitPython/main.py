@@ -1,5 +1,5 @@
 # Pi Pico MIDI controller
-
+print('hello world!')
 import board
 import digitalio
 import time
@@ -51,21 +51,13 @@ button_3.pull = digitalio.Pull.DOWN
 # Reverb Time: 34
 # Reverb Depth: 35
 # Reverb Mix: 36
-# Delay Mix: 32
-midi_cc = [28, 29, 30, 31, 34, 35, 36, 32]
-new_midi_values = [0,0,0,0,0,0,0,0]
-current_midi_values = [0,0,0,0,0,0,0,0]
+
+midi_cc = [28, 29, 30, 31, 34, 35, 36]
+new_midi_values = [0,0,0,0,0,0,0]
+current_midi_values = [0,0,0,0,0,0,0]
 
 
-# Potentiometer Controls
-# 1: Mod Time
-# 2: Mod Depth
-# 3: Delay Time
-# 4: Delay Depth
-# 5: Reverb Time
-# 6: Reverb Depth
-# 7: Reverb Mix
-# 8: 'tilt LFO' -> Reverb Depth
+
 pot_readings = [0,0,0,0,0,0,0,0]
 
 # set up
@@ -110,23 +102,27 @@ while True:
     #print('midi_values: ', midi_values)
 
     ## Map Potentiometer Readings to Midi CCs ##
-    new_midi_values[0] = pot_readings[0]
-    new_midi_values[1] = pot_readings[1]
-    new_midi_values[2] = pot_readings[2]
-    new_midi_values[3] = pot_readings[3]
-    new_midi_values[4] = pot_readings[4]
-    new_midi_values[5] = pot_readings[5]
-    new_midi_values[6] = pot_readings[6]
-    new_midi_values[7] = pot_readings[7]
+    new_midi_values[0] = pot_readings[0]    # Pot 0: Mod Time
+    new_midi_values[1] = pot_readings[1]    # Pot 1: Mod Depth
+    new_midi_values[2] = pot_readings[2]    # Pot 2: Delay Time
+    new_midi_values[3] = pot_readings[3]    # Pot 3: Delay Depth
+    new_midi_values[4] = pot_readings[4]    # Pot 4: Reverb Time
+    new_midi_values[6] = pot_readings[6]    # Pot 6: Reverb Mix
+
+    # Pot 5: Base Reverb Depth
+    # Pot 7: 'tilt LFO' -> Reverb Depth
+    #new_midi_values[5] = pot_readings[5]
+    new_midi_values[5] = int((pot_readings[5] + pot_readings[7])/2)
+    print('new_midi', new_midi_values)
+    # print('pot_readings', pot_readings)
 
     ## Send the MIDI CCs ##
-    for i in range(0,8):
+    for i in range(0,7):
         if current_midi_values[i] != new_midi_values[i]: #send the midi message only if it has changed
             current_midi_values[i] = new_midi_values[i]
             midi.send(ControlChange(midi_cc[i], current_midi_values[i]))
 
-
-
+    time.sleep(2.0)
 
 
 
