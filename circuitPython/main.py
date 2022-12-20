@@ -43,10 +43,30 @@ button_2.pull = digitalio.Pull.DOWN
 button_3.pull = digitalio.Pull.DOWN
 
 # mapping
+# MIDI CCs
+# Mod Time: 28
+# Mod Depth: 29
+# Delay Time: 30
+# Delay Depth: 31
+# Reverb Time: 34
+# Reverb Depth: 35
+# Reverb Mix: 36
+# Delay Mix: 32
 midi_cc = [28, 29, 30, 31, 34, 35, 36, 32]
-midi_values = [0,0,0,0,0,0,0,0]
+new_midi_values = [0,0,0,0,0,0,0,0]
+current_midi_values = [0,0,0,0,0,0,0,0]
 
 
+# Potentiometer Controls
+# 1: Mod Time
+# 2: Mod Depth
+# 3: Delay Time
+# 4: Delay Depth
+# 5: Reverb Time
+# 6: Reverb Depth
+# 7: Reverb Mix
+# 8: 'tilt LFO' -> Reverb Depth
+pot_readings = [0,0,0,0,0,0,0,0]
 
 # set up
 mux_0.value = False
@@ -54,41 +74,59 @@ mux_1.value = False
 mux_2.value = False
 
 while True:
+    ## Read Potentiometers ##
     # pot 3: 000
     mux_2.value = False
-    midi_values[3] = int(mux_reading.value/512) #simpler/faster to bit shift. will try if this is too slow. May be limited by mux chip though.
+    pot_readings[3] = mux_reading.value >> 9
     time.sleep(SLEEP_TIME)
     # pot 7: 001
     mux_0.value = True
-    midi_values[7] = int(mux_reading.value/512)
+    pot_readings[7] = mux_reading.value >> 9
     time.sleep(SLEEP_TIME)
     # pot 6: 011
     mux_1.value = True
-    midi_values[6] = int(mux_reading.value/512)
+    pot_readings[6] = mux_reading.value >> 9
     time.sleep(SLEEP_TIME)
     # pot 2: 010
     mux_0.value = False
-    midi_values[2] = int(mux_reading.value/512)
+    pot_readings[2] = mux_reading.value >> 9
     time.sleep(SLEEP_TIME)
     # pot 0: 110
     mux_2.value = True
-    midi_values[0] = int(mux_reading.value/512)
+    pot_readings[0] = mux_reading.value >> 9
     time.sleep(SLEEP_TIME)
     # pot 4: 111
     mux_0.value = True
-    midi_values[4] = int(mux_reading.value/512)
+    pot_readings[4] = mux_reading.value >> 9
     time.sleep(SLEEP_TIME)
     # pot 5: 101
     mux_1.value = False
-    midi_values[5] = int(mux_reading.value/512)
+    pot_readings[5] = mux_reading.value >> 9
     time.sleep(SLEEP_TIME)
     # pot 1: 100
     mux_0.value = False
-    midi_values[1] = int(mux_reading.value/512)
+    pot_readings[1] = mux_reading.value >> 9
     time.sleep(SLEEP_TIME)
     #print('midi_values: ', midi_values)
+
+    ## Map Potentiometer Readings to Midi CCs ##
+    new_midi_values[0] = pot_readings[0]
+    new_midi_values[1] = pot_readings[1]
+    new_midi_values[2] = pot_readings[2]
+    new_midi_values[3] = pot_readings[3]
+    new_midi_values[4] = pot_readings[4]
+    new_midi_values[5] = pot_readings[5]
+    new_midi_values[6] = pot_readings[6]
+    new_midi_values[7] = pot_readings[7]
+
+    ## Send the MIDI CCs ##
     for i in range(0,8):
-        midi.send(ControlChange(midi_cc[i], midi_values[i]))
+        if current_midi_values[i] != new_midi_values[i]: #send the midi message only if it has changed
+            current_midi_values[i] = new_midi_values[i]
+            midi.send(ControlChange(midi_cc[i], current_midi_values[i]))
+
+
+
 
 
 
