@@ -56,14 +56,16 @@ midi_cc = [28, 29, 30, 31, 34, 35, 36]
 new_midi_values = [0,0,0,0,0,0,0]
 current_midi_values = [0,0,0,0,0,0,0]
 
-
-
 pot_readings = [0,0,0,0,0,0,0,0]
 
-# set up
 mux_0.value = False
 mux_1.value = False
 mux_2.value = False
+
+lfo_last_update = time.monotonic()
+lfo_step = -1
+lfo_range = 30
+lfo_value = 0
 
 while True:
     ## Read Potentiometers ##
@@ -112,8 +114,21 @@ while True:
     # Pot 5: Base Reverb Depth
     # Pot 7: 'tilt LFO' -> Reverb Depth
     #new_midi_values[5] = pot_readings[5]
-    new_midi_values[5] = int((pot_readings[5] + pot_readings[7])/2)
-    print('new_midi', new_midi_values)
+    # new_midi_values[5] = int((pot_readings[5] + pot_readings[7])/2)
+    # print('new_midi', new_midi_values)
+    lfo_update_interval = 0.01 + 0.001*pot_readings[7]*2 # minimum 0.01 seconds between change plus 0 to 128*2 milliseconds
+    # is it time yet?
+    if time.monotonic() >= (lfo_last_update + lfo_update_interval):
+        lfo_value += lfo_step
+        lfo_last_update = time.monotonic()
+
+    # if lfo_value is bigger or smaller than lfo_range, change the sign of lfo_step
+    if abs(lfo_value) > lfo_range: # breaks if lfo_range is not fixed
+        lfo_step *= -1
+    new_midi_values[5] = pot_readings[5] + lfo_value
+    #print('new_midi', new_midi_values)
+
+
     # print('pot_readings', pot_readings)
 
     ## Send the MIDI CCs ##
@@ -122,7 +137,7 @@ while True:
             current_midi_values[i] = new_midi_values[i]
             midi.send(ControlChange(midi_cc[i], current_midi_values[i]))
 
-    time.sleep(2.0)
+    #time.sleep(0.2)
 
 
 
