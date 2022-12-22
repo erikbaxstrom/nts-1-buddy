@@ -64,7 +64,7 @@ mux_2.value = False
 
 lfo_last_update = time.monotonic()
 lfo_step = -1
-lfo_range = 30
+lfo_range = 15
 lfo_value = 0
 
 while True:
@@ -113,20 +113,18 @@ while True:
 
     # Pot 5: Base Reverb Depth
     # Pot 7: 'tilt LFO' -> Reverb Depth
-    #new_midi_values[5] = pot_readings[5]
-    # new_midi_values[5] = int((pot_readings[5] + pot_readings[7])/2)
-    # print('new_midi', new_midi_values)
-    lfo_update_interval = 0.01 + 0.001*pot_readings[7]*2 # minimum 0.01 seconds between change plus 0 to 128*2 milliseconds
-    # is it time yet?
-    if time.monotonic() >= (lfo_last_update + lfo_update_interval):
-        lfo_value += lfo_step
-        lfo_last_update = time.monotonic()
-
-    # if lfo_value is bigger or smaller than lfo_range, change the sign of lfo_step
+    # Translate pot 7 to a time interval
+    lfo_update_interval = 0.01 + 0.01*pot_readings[7]*2 # minimum 0.01 seconds between change plus 0 to 128*2*10 milliseconds
+    # Is it time yet?
     if abs(lfo_value) > lfo_range: # breaks if lfo_range is not fixed
         lfo_step *= -1
+    if time.monotonic() >= (lfo_last_update + lfo_update_interval):
+        lfo_last_update = time.monotonic()
+        lfo_value += lfo_step
+        print('lfo_value', lfo_value)
+    # If lfo_value is bigger or smaller than lfo_range, change the sign of lfo_step
     new_midi_values[5] = pot_readings[5] + lfo_value
-    #print('new_midi', new_midi_values)
+    #print('new_midi', new_midi_values, 'lfo_value', lfo_value)
 
 
     # print('pot_readings', pot_readings)
