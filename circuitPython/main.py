@@ -66,6 +66,7 @@ lfo_last_update = time.monotonic()
 lfo_step = -1
 lfo_range = 15
 lfo_value = 0
+lfo_output = 0
 
 while True:
     ## Read Potentiometers ##
@@ -114,16 +115,32 @@ while True:
     # Pot 5: Base Reverb Depth
     # Pot 7: 'tilt LFO' -> Reverb Depth
     # Translate pot 7 to a time interval
-    lfo_update_interval = 0.01 + 0.01*pot_readings[7]*2 # minimum 0.01 seconds between change plus 0 to 128*2*10 milliseconds
+    lfo_update_interval = 0.001 + 0.005*pot_readings[7]/4 # minimum 0.01 seconds between change plus 0 to 128*2*10 milliseconds
+
     # Is it time yet?
-    if abs(lfo_value) > lfo_range: # breaks if lfo_range is not fixed
-        lfo_step *= -1
     if time.monotonic() >= (lfo_last_update + lfo_update_interval):
         lfo_last_update = time.monotonic()
         lfo_value += lfo_step
-        print('lfo_value', lfo_value)
-    # If lfo_value is bigger or smaller than lfo_range, change the sign of lfo_step
-    new_midi_values[5] = pot_readings[5] + lfo_value
+        lfo_output = pot_readings[5] + lfo_value
+        #new_midi_values[5] = lfo_output
+
+
+        # If lfo_value is bigger or smaller than lfo_range, change the sign of lfo_step
+        if lfo_value > lfo_range:
+            lfo_step = -1
+        if lfo_value < -lfo_range:
+            lfo_step = 1
+        # Limit the peaks so the LFO doesn't take the output outside of 0-127
+        if lfo_output > 126:
+            #lfo_step = -1 #limit the LFO range (breaks when pot5 is adjusted while lfo_value is peaking
+            lfo_output = 127 #clip the LFO waveform
+        if lfo_output < 1:
+            #lfo_step = 1
+            lfo_output = 0
+        #new_midi_values[5] = pot_readings[5] + lfo_value
+    new_midi_values[5] = lfo_output
+    #print('midi_out[5]', new_midi_values[5])
+    #new_midi_values[5] = pot_readings[5] + lfo_value
     #print('new_midi', new_midi_values, 'lfo_value', lfo_value)
 
 
