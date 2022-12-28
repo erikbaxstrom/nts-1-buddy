@@ -115,7 +115,8 @@ while True:
     # Pot 5: Base Reverb Depth
     # Pot 7: 'tilt LFO' -> Reverb Depth
     # Translate pot 7 to a time interval
-    lfo_update_interval = 0.001 + 0.005*pot_readings[7]/4 # minimum 0.01 seconds between change plus 0 to 128*2*10 milliseconds
+    lfo_update_interval = 0.001 + 0.005*pot_readings[7]/8 # minimum 0.01 seconds between change plus 0 to 128*2*10 milliseconds
+    lfo_range = pot_readings[7] >> 2
 
     # Is it time yet?
     if time.monotonic() >= (lfo_last_update + lfo_update_interval):
