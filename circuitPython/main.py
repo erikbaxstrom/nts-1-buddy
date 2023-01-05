@@ -1,5 +1,5 @@
 # Pi Pico MIDI controller
-
+print('hello world!')
 import board
 import digitalio
 import time
@@ -51,58 +51,122 @@ button_3.pull = digitalio.Pull.DOWN
 # Reverb Time: 34
 # Reverb Depth: 35
 # Reverb Mix: 36
-# Delay Mix: 32
-midi_cc = [28, 29, 30, 31, 34, 35, 36, 32]
-new_midi_values = [0,0,0,0,0,0,0,0]
-current_midi_values = [0,0,0,0,0,0,0,0]
+
+midi_cc = [28, 29, 30, 31, 34, 35, 36]
+new_midi_values = [0,0,0,0,0,0,0]
+current_midi_values = [0,0,0,0,0,0,0]
+
+pot_readings = [0,0,0,0,0,0,0,0]
 
 
-
-# set up
 mux_0.value = False
 mux_1.value = False
 mux_2.value = False
 
+lfo_last_update = time.monotonic()
+lfo_step = -1
+lfo_range = 15
+lfo_value = 0
+lfo_output = 0
+lfo_destination = [0,0,0,0,0,1,0] #default to Reverb Depth
+
+
 while True:
+    ## Read Potentiometers ##
     # pot 3: 000
     mux_2.value = False
-    new_midi_values[3] = mux_reading.value >> 9
+    pot_readings[3] = mux_reading.value >> 9
     time.sleep(SLEEP_TIME)
     # pot 7: 001
     mux_0.value = True
-    new_midi_values[7] = mux_reading.value >> 9
+    pot_readings[7] = mux_reading.value >> 9
     time.sleep(SLEEP_TIME)
     # pot 6: 011
     mux_1.value = True
-    new_midi_values[6] = mux_reading.value >> 9
+    pot_readings[6] = mux_reading.value >> 9
     time.sleep(SLEEP_TIME)
     # pot 2: 010
     mux_0.value = False
-    new_midi_values[2] = mux_reading.value >> 9
+    pot_readings[2] = mux_reading.value >> 9
     time.sleep(SLEEP_TIME)
     # pot 0: 110
     mux_2.value = True
-    new_midi_values[0] = mux_reading.value >> 9
+    pot_readings[0] = mux_reading.value >> 9
     time.sleep(SLEEP_TIME)
     # pot 4: 111
     mux_0.value = True
-    new_midi_values[4] = mux_reading.value >> 9
+    pot_readings[4] = mux_reading.value >> 9
     time.sleep(SLEEP_TIME)
     # pot 5: 101
     mux_1.value = False
-    new_midi_values[5] = mux_reading.value >> 9
+    pot_readings[5] = mux_reading.value >> 9
     time.sleep(SLEEP_TIME)
     # pot 1: 100
     mux_0.value = False
-    new_midi_values[1] = mux_reading.value >> 9
+    pot_readings[1] = mux_reading.value >> 9
     time.sleep(SLEEP_TIME)
     #print('midi_values: ', midi_values)
-    for i in range(0,8):
-        if current_midi_values[i] != new_midi_values[i]: #send the midi message only if it has changed
+
+    ## Map Potentiometer Readings to Midi CCs ##
+    new_midi_values[0] = pot_readings[0]    # Pot 0: Mod Time
+    new_midi_values[1] = pot_readings[1]    # Pot 1: Mod Depth
+    new_midi_values[2] = pot_readings[2]    # Pot 2: Delay Time
+    new_midi_values[3] = pot_readings[3]    # Pot 3: Delay Depth
+    new_midi_values[4] = pot_readings[4]    # Pot 4: Reverb Time
+    new_midi_values[5] = pot_readings[5]    # Pot 5: Reverb Depth
+    new_midi_values[6] = pot_readings[6]    # Pot 6: Reverb Mix
+
+    # Pot 5: Base Reverb Depth
+    # Pot 7: 'tilt LFO' -> Reverb Depth
+    # Translate pot 7 to a time interval
+    lfo_update_interval = 0.001 + 0.005*pot_readings[7]/8 # minimum 0.01 seconds between change plus 0 to 128*2*10 milliseconds
+    lfo_range = pot_readings[7] >> 2
+
+    # Is it time yet?
+    if time.monotonic() >= (lfo_last_update + lfo_update_interval):
+        lfo_last_update = time.monotonic()
+        lfo_value += lfo_step
+        #lfo_output = pot_readings[5] + lfo_value
+        #new_midi_values[5] = lfo_output
+
+
+        # If lfo_value is bigger or smaller than lfo_range, change the sign of lfo_step
+        if lfo_value > lfo_range:
+            lfo_step = -1
+        if lfo_value < -lfo_range:
+            lfo_step = 1
+
+
+        #new_midi_values[5] = pot_readings[5] + lfo_value
+    #new_midi_values[5] = lfo_output
+    #print('midi_out[5]', new_midi_values[5])
+    #new_midi_values[5] = pot_readings[5] + lfo_value
+    #print('new_midi', new_midi_values, 'lfo_value', lfo_value)
+
+
+    # print('pot_readings', pot_readings)
+
+    # Read Buttons and Map to LFO Outpus
+
+
+
+
+    ## Send the MIDI CCs ##
+    for i in range(0,7):
+        new_midi_values[i] += lfo_destination[i] * lfo_value #add the lfo_output to selected destinations
+        if i == 6:
+            print(i, lfo_destination[i], lfo_value, new_midi_values[i])
+        # Limit the peaks so the LFO doesn't take the output outside of 0-127
+        if new_midi_values[i] > 126:
+            new_midi_values[i] = 127
+        if new_midi_values[i] < 1:
+            new_midi_values[i] = 0
+        # Send the new MIDI value, if it has changed
+        if current_midi_values[i] != new_midi_values[i]:
             current_midi_values[i] = new_midi_values[i]
             midi.send(ControlChange(midi_cc[i], current_midi_values[i]))
 
-
+    #time.sleep(0.1)
 
 
 
