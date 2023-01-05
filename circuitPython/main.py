@@ -58,6 +58,7 @@ current_midi_values = [0,0,0,0,0,0,0]
 
 pot_readings = [0,0,0,0,0,0,0,0]
 
+
 mux_0.value = False
 mux_1.value = False
 mux_2.value = False
@@ -67,6 +68,8 @@ lfo_step = -1
 lfo_range = 15
 lfo_value = 0
 lfo_output = 0
+lfo_destination = [0,0,0,0,0,1,0] #default to Reverb Depth
+
 
 while True:
     ## Read Potentiometers ##
@@ -110,6 +113,7 @@ while True:
     new_midi_values[2] = pot_readings[2]    # Pot 2: Delay Time
     new_midi_values[3] = pot_readings[3]    # Pot 3: Delay Depth
     new_midi_values[4] = pot_readings[4]    # Pot 4: Reverb Time
+    new_midi_values[5] = pot_readings[5]    # Pot 5: Reverb Depth
     new_midi_values[6] = pot_readings[6]    # Pot 6: Reverb Mix
 
     # Pot 5: Base Reverb Depth
@@ -122,7 +126,7 @@ while True:
     if time.monotonic() >= (lfo_last_update + lfo_update_interval):
         lfo_last_update = time.monotonic()
         lfo_value += lfo_step
-        lfo_output = pot_readings[5] + lfo_value
+        #lfo_output = pot_readings[5] + lfo_value
         #new_midi_values[5] = lfo_output
 
 
@@ -131,15 +135,10 @@ while True:
             lfo_step = -1
         if lfo_value < -lfo_range:
             lfo_step = 1
-        # Limit the peaks so the LFO doesn't take the output outside of 0-127
-        if lfo_output > 126:
-            #lfo_step = -1 #limit the LFO range (breaks when pot5 is adjusted while lfo_value is peaking
-            lfo_output = 127 #clip the LFO waveform
-        if lfo_output < 1:
-            #lfo_step = 1
-            lfo_output = 0
+
+
         #new_midi_values[5] = pot_readings[5] + lfo_value
-    new_midi_values[5] = lfo_output
+    #new_midi_values[5] = lfo_output
     #print('midi_out[5]', new_midi_values[5])
     #new_midi_values[5] = pot_readings[5] + lfo_value
     #print('new_midi', new_midi_values, 'lfo_value', lfo_value)
@@ -147,13 +146,27 @@ while True:
 
     # print('pot_readings', pot_readings)
 
+    # Read Buttons and Map to LFO Outpus
+
+
+
+
     ## Send the MIDI CCs ##
     for i in range(0,7):
-        if current_midi_values[i] != new_midi_values[i]: #send the midi message only if it has changed
+        new_midi_values[i] += lfo_destination[i] * lfo_value #add the lfo_output to selected destinations
+        if i == 6:
+            print(i, lfo_destination[i], lfo_value, new_midi_values[i])
+        # Limit the peaks so the LFO doesn't take the output outside of 0-127
+        if new_midi_values[i] > 126:
+            new_midi_values[i] = 127
+        if new_midi_values[i] < 1:
+            new_midi_values[i] = 0
+        # Send the new MIDI value, if it has changed
+        if current_midi_values[i] != new_midi_values[i]:
             current_midi_values[i] = new_midi_values[i]
             midi.send(ControlChange(midi_cc[i], current_midi_values[i]))
 
-    #time.sleep(0.2)
+    #time.sleep(0.1)
 
 
 
