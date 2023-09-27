@@ -1,10 +1,10 @@
 # Pi Pico MIDI controller
-print('hello world!')
+import adafruit_midi
 import board
+import busio
 import digitalio
 import time
-import busio
-import adafruit_midi
+
 from adafruit_midi.control_change import ControlChange
 from analogio import AnalogIn
 
@@ -12,7 +12,6 @@ led = digitalio.DigitalInOut(board.LED)
 led.direction = digitalio.Direction.OUTPUT
 
 CHANNEL = 1
-SLEEP_TIME = 0.00
 
 uart = busio.UART(board.GP0, board.GP1, baudrate=31250, timeout=0.001)
 midi = adafruit_midi.MIDI(midi_out=uart, midi_in=uart, out_channel=CHANNEL - 1, debug=False)
@@ -72,40 +71,31 @@ lfo_destination = [0,0,0,0,0,1,0] #default to Reverb Depth
 
 
 while True:
-    ## Read Potentiometers ##
+    ## Read Potentiometers (Gray Codes for speed and accuracy)##
     # pot 3: 000
     mux_2.value = False
     pot_readings[3] = mux_reading.value >> 9
-    time.sleep(SLEEP_TIME)
     # pot 7: 001
     mux_0.value = True
     pot_readings[7] = mux_reading.value >> 9
-    time.sleep(SLEEP_TIME)
     # pot 6: 011
     mux_1.value = True
     pot_readings[6] = mux_reading.value >> 9
-    time.sleep(SLEEP_TIME)
     # pot 2: 010
     mux_0.value = False
     pot_readings[2] = mux_reading.value >> 9
-    time.sleep(SLEEP_TIME)
     # pot 0: 110
     mux_2.value = True
     pot_readings[0] = mux_reading.value >> 9
-    time.sleep(SLEEP_TIME)
     # pot 4: 111
     mux_0.value = True
     pot_readings[4] = mux_reading.value >> 9
-    time.sleep(SLEEP_TIME)
     # pot 5: 101
     mux_1.value = False
     pot_readings[5] = mux_reading.value >> 9
-    time.sleep(SLEEP_TIME)
     # pot 1: 100
     mux_0.value = False
     pot_readings[1] = mux_reading.value >> 9
-    time.sleep(SLEEP_TIME)
-    #print('midi_values: ', midi_values)
 
     ## Map Potentiometer Readings to Midi CCs ##
     new_midi_values[0] = pot_readings[0]    # Pot 0: Mod Time
@@ -118,14 +108,7 @@ while True:
 
 
     ## Read Buttons and Map to LFO Outputs
-    # MIDI CCs
-    # Mod Time: 28
-    # Mod Depth: 29
-    # Delay Time: 30
-    # Delay Depth: 31
-    # Reverb Time: 34
-    # Reverb Depth: 35
-    # Reverb Mix: 36
+
     if button_0.value:
         lfo_destination = [1,0,0,0,0,0,0] #mod time
         print('mod time')
@@ -144,16 +127,13 @@ while True:
         lfo_value = 0
     else:
         # Translate pot 7 to a time interval and to LFO Range
-        lfo_update_interval = 0.001 + 0.005*pot_readings[7]/8 # minimum 0.01 seconds between change plus 0 to 128*2*10 milliseconds
-        lfo_range = pot_readings[7] >> 2 #allow 0-25% up or down
+        lfo_update_interval = 0.001 + 0.005*pot_readings[7]/8  # minimum 0.01 seconds between change plus 0 to 128*2*10 milliseconds
+        lfo_range = pot_readings[7] >> 2  # allow 0-25% up or down
 
         # Is it time yet?
         if time.monotonic() >= (lfo_last_update + lfo_update_interval):
             lfo_last_update = time.monotonic()
             lfo_value += lfo_step
-            #lfo_output = pot_readings[5] + lfo_value
-            #new_midi_values[5] = lfo_output
-
 
             # If lfo_value is bigger or smaller than lfo_range, change the sign of lfo_step
             if lfo_value > lfo_range:
@@ -162,23 +142,10 @@ while True:
                 lfo_step = 1
 
 
-            #new_midi_values[5] = pot_readings[5] + lfo_value
-        #new_midi_values[5] = lfo_output
-        #print('midi_out[5]', new_midi_values[5])
-        #new_midi_values[5] = pot_readings[5] + lfo_value
-        #print('new_midi', new_midi_values, 'lfo_value', lfo_value)
-
-
-    # print('pot_readings', pot_readings)
-
-
-
-
-
     ## Send the MIDI CCs ##
     for i in range(0,7):
-        new_midi_values[i] += lfo_destination[i] * lfo_value #add the lfo_output to selected destinations
-        # Limit the peaks so the LFO doesn't take the output outside of 0-127
+        new_midi_values[i] += lfo_destination[i] * lfo_value  # add the lfo_output to selected destinations
+        # Limit the peaks so the LFO doesn't send MIDI values outside of 0-127
         if new_midi_values[i] > 126:
             new_midi_values[i] = 127
         if new_midi_values[i] < 1:
@@ -187,9 +154,7 @@ while True:
         if current_midi_values[i] != new_midi_values[i]:
             current_midi_values[i] = new_midi_values[i]
             midi.send(ControlChange(midi_cc[i], current_midi_values[i]))
-            #print(current_midi_values)
 
-    #time.sleep(0.1)
 
 
 
