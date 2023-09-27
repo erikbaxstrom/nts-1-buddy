@@ -2,11 +2,22 @@
 
 A MIDI controller and companion for my Korg NTS-1. The NTS-1 is powerful, but with only two control knobs, it's hard to adjust the effects in real time. I primarily use the effects (not the synth) so a keyboard is unnecessary. Commercially available MIDI controllers are often expensive, bulky, or not directly compatible with Serial MIDI.
 
-## Concept
+[Video Demo](https://youtu.be/BtjPHSbGkIc)
 
-MIDI controller that's compact (about the same size as the NTS-1) and can control and/or modulate parameters through MIDI CC.
+## Design Goals
 
-Aim to use inexpensive, widely available components.
+- MIDI controller that's compact (about the same size as the NTS-1)
+- can control and/or modulate parameters through MIDI CC
+- Does not require additional MIDI converters or a USB Host
+- USB powered
+- Use inexpensive, widely available components
+
+## Future Development
+
+- Add a configuration file so other parameters could easily be mapped to the buttons and knobs.
+- Clean up and/or optimize the code
+
+# Build Log
 
 ### NTS-1 MID Parameters
 
